@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thing Namer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a0f;
+      color: #e0e0f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      letter-spacing: 0.15em;
+      color: #a78bfa;
+      text-transform: uppercase;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #6b7280;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Form ── */
+    #form-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      background: #111120;
+      border: 1px solid #2d2d4e;
+      border-radius: 6px;
+      color: #e0e0f0;
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.9rem 1rem;
+      resize: vertical;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    }
+
+    #generate-btn {
+      align-self: flex-start;
+      background: #7c3aed;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 2rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    #generate-btn:hover { background: #6d28d9; }
+    #generate-btn:active { transform: scale(0.97); }
+
+    /* ── Thinking panel ── */
+    #thinking-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .spinner {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .orb {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: #a78bfa;
+      border-right-color: #7c3aed;
+      animation: spin 0.9s linear infinite;
+      position: relative;
+    }
+
+    .orb::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #7c3aed44 0%, transparent 70%);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      letter-spacing: 0.06em;
+      color: #4b5563;
+      transition: color 0.3s, background 0.3s;
+    }
+
+    .step .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2d2d4e;
+      flex-shrink: 0;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .step.active {
+      color: #a78bfa;
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .step.active .dot {
+      background: #a78bfa;
+      box-shadow: 0 0 6px #a78bfa;
+      animation: blink 0.7s ease-in-out infinite;
+    }
+
+    .step.done {
+      color: #6d7dae;
+    }
+
+    .step.done .dot {
+      background: #4b5563;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Result panel ── */
+    #result-panel {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      color: #6b7280;
+      text-transform: uppercase;
+    }
+
+    .result-name {
+      font-size: 3.2rem;
+      font-weight: bold;
+      letter-spacing: 0.12em;
+      color: #a78bfa;
+      text-shadow: 0 0 30px rgba(167, 139, 250, 0.4);
+      margin-top: 0.2rem;
+    }
+
+    .result-comment {
+      color: #9ca3af;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      border-left: 2px solid #2d2d4e;
+      padding-left: 1rem;
+    }
+
+    #restart-btn {
+      align-self: flex-start;
+      background: transparent;
+      color: #7c3aed;
+      border: 1px solid #7c3aed;
+      border-radius: 6px;
+      padding: 0.6rem 1.5rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #restart-btn:hover {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid #1f1f35;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Thing Namer</h1>
+      <p>Advanced nomenclature generation powered by next-generation AI</p>
+    </header>
+
+    <!-- Input form -->
+    <div id="form-panel">
+      <label for="description">Describe the thing you would like named</label>
+      <textarea id="description" placeholder="e.g. a mobile app that lets you track your houseplants' watering schedules..."></textarea>
+      <button id="generate-btn" onclick="startNaming()">Generate Name</button>
+    </div>
+
+    <!-- Thinking animation -->
+    <div id="thinking-panel">
+      <div class="spinner">
+        <div class="orb"></div>
+      </div>
+      <div class="steps" id="steps-list"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="result-panel">
+      <div>
+        <div class="result-label">Your name is ready</div>
+        <div class="result-name">Decodeon</div>
+      </div>
+      <hr class="divider">
+      <p class="result-comment" id="result-comment"></p>
+      <button id="restart-btn" onclick="restart()">Name another thing</button>
+    </div>
+  </div>
+
+  <script>
+    const STEPS = [
+      { label: "Initiating Naming Schema",         duration: 1200 },
+      { label: "Parsing Semantic Intent",           duration: 1100 },
+      { label: "Querying LLM with User Input",      duration: 1800 },
+      { label: "Awaiting Token Stream",             duration: 900  },
+      { label: "Manifesting LLM response",          duration: 1300 },
+      { label: "Vibing with panache",               duration: 1000 },
+      { label: "Cross-referencing Nomenclature DB", duration: 1400 },
+      { label: "Aligning Creative Frequencies",     duration: 1100 },
+      { label: "Distilling Phonetic Resonance",     duration: 1200 },
+      { label: "Crystallizing Identity",            duration: 1000 },
+    ];
+
+    const COMMENT_TEMPLATES = [
+      (desc) => `Decodeon captures the essential nature of ${extractSubject(desc)} through a precise fusion of discovery and forward momentum — its cadence is immediately recognizable yet entirely original, carrying the kind of weight that earns trust on first hearing.`,
+      (desc) => `With ${extractSubject(desc)} as its foundation, Decodeon emerges as the only logical conclusion: a name that encodes ambition, signals clarity, and rolls off the tongue with the authority your thing deserves.`,
+      (desc) => `Decodeon is a perfect fit for ${extractSubject(desc)} — the "-eon" suffix evokes scale and permanence, while "Decode" speaks directly to the act of revealing something previously hidden, making it feel both purposeful and memorable.`,
+      (desc) => `The name Decodeon resonates deeply with ${extractSubject(desc)}: it balances the analytical ("decode") with the grand ("-eon"), projecting exactly the kind of sophisticated, forward-looking identity that stands out in any space.`,
+      (desc) => `For something like ${extractSubject(desc)}, Decodeon is the name that arrives before you realize you were looking for it — authoritative, scalable, and subtly evocative of the transformative experience you're creating.`,
+    ];
+
+    function extractSubject(desc) {
+      const trimmed = desc.trim().replace(/[.!?]+$/, '').toLowerCase();
+      if (!trimmed) return "this concept";
+      // try to trim leading articles/phrases
+      const cleaned = trimmed.replace(/^(a |an |the |it['']s |i want |i need |we need |we want |something that |something |this is |this |describe |it is )/i, '');
+      if (cleaned.length < 4) return "this";
+      return cleaned.length > 80 ? cleaned.slice(0, 80) + "…" : cleaned;
+    }
+
+    function pickComment(desc) {
+      const idx = Math.abs(desc.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % COMMENT_TEMPLATES.length;
+      return COMMENT_TEMPLATES[idx](desc);
+    }
+
+    async function startNaming() {
+      const desc = document.getElementById('description').value.trim();
+      if (!desc) {
+        document.getElementById('description').focus();
+        return;
+      }
+
+      document.getElementById('form-panel').style.display  = 'none';
+      document.getElementById('result-panel').style.display = 'none';
+
+      const thinkingPanel = document.getElementById('thinking-panel');
+      thinkingPanel.style.display = 'flex';
+
+      const stepsList = document.getElementById('steps-list');
+      stepsList.innerHTML = '';
+
+      // Build step elements
+      const stepEls = STEPS.map((s, i) => {
+        const el = document.createElement('div');
+        el.className = 'step';
+        el.innerHTML = `<span class="dot"></span><span>${s.label}…</span>`;
+        stepsList.appendChild(el);
+        return el;
+      });
+
+      // Animate steps sequentially
+      let elapsed = 0;
+      for (let i = 0; i < stepEls.length; i++) {
+        await delay(i === 0 ? 300 : STEPS[i - 1].duration);
+        if (i > 0) {
+          stepEls[i - 1].classList.remove('active');
+          stepEls[i - 1].classList.add('done');
+        }
+        stepEls[i].classList.add('active');
+        elapsed += STEPS[i].duration;
+      }
+
+      // Hold last step briefly then finish
+      await delay(STEPS[STEPS.length - 1].duration);
+      stepEls[stepEls.length - 1].classList.remove('active');
+      stepEls[stepEls.length - 1].classList.add('done');
+
+      await delay(400);
+
+      // Show result
+      thinkingPanel.style.display = 'none';
+      document.getElementById('result-comment').textContent = pickComment(desc);
+      const resultPanel = document.getElementById('result-panel');
+      resultPanel.style.display = 'flex';
+    }
+
+    function restart() {
+      document.getElementById('result-panel').style.display  = 'none';
+      document.getElementById('thinking-panel').style.display = 'none';
+      document.getElementById('form-panel').style.display    = 'flex';
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+Started GET "/" for ::1 at 2026-05-07 17:22:53 -0400
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL)[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by NamesController#index as */*
+  Rendering layout layouts/application.html.erb
+  Rendering names/index.html.erb within layouts/application
+  Rendered names/index.html.erb within layouts/application (Duration: 1.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 230.3ms | GC: 52.4ms)
+Completed 200 OK in 398ms (Views: 254.3ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 52.9ms)
+
+
+Started GET "/" for ::1 at 2026-05-07 17:23:02 -0400
+Processing by NamesController#index as */*
+  Rendering layout layouts/application.html.erb
+  Rendering names/index.html.erb within layouts/application
+  Rendered names/index.html.erb within layouts/application (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.7ms | GC: 0.1ms)
+Completed 200 OK in 6ms (Views: 5.2ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.1ms)
+
+
+Started GET "/" for ::1 at 2026-05-07 17:23:11 -0400
+Processing by NamesController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering names/index.html.erb within layouts/application
+  Rendered names/index.html.erb within layouts/application (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 17.4ms | GC: 0.0ms)
+Completed 200 OK in 20ms (Views: 17.8ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/manifest.json" for ::1 at 2026-05-07 17:23:12 -0400
+Processing by Rails::PwaController#manifest as JSON
+  Rendering pwa/manifest.json.erb
+  Rendered pwa/manifest.json.erb (Duration: 0.3ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 4.8ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
