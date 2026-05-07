@@ -9,6 +9,7 @@ RUN apk add --no-cache \
     curl \
     sqlite \
     sqlite-libs \
+    tzdata \
     jemalloc
 
 ENV RAILS_ENV="production" \
